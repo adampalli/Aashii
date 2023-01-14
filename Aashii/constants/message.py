@@ -128,7 +128,7 @@ class Message:
 
     INFORM_DECLINE = (
         "Your request to join the group was declined due to "
-        "various reasons. Try again after few months."
+        "various reasons. No need to contact the bot further."
     )
 
     INVALID_COMMAND = "I don't understand what you are talking about …"
