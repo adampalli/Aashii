@@ -6,7 +6,7 @@ import re
 from telegram import InlineKeyboardMarkup, Update
 from telegram.error import Unauthorized
 from telegram.ext import CallbackContext
-from Aashii.constants import Button, Literal, Message
+from Aashii.constants import Button, Literal, Media, Message
 
 _p = re.compile("<[^>]*>")
 
@@ -30,7 +30,7 @@ def block_user(user_id: int, context: CallbackContext):
     database.set_user_blocked(user_id, True)
     try:
         msg = context.bot.send_photo(
-            photo="https://telegra.ph/file/68aa3d09729058f1883f5.jpg",
+            photo=Media.BLOCKED_USER,
             chat_id=user_id,
             caption=Message.BLOCKED_USER_STATUS,
         )

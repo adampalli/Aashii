@@ -2,7 +2,7 @@
 
 from telegram import ChatMember, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
-from Aashii.constants import Button, Literal, Message
+from Aashii.constants import Button, Literal, Media, Message
 from Aashii.utils.broadcast import announce
 from Aashii.utils.misc import (
     block_user,
@@ -165,7 +165,7 @@ def send_help(update: Update, context: CallbackContext):
     group depending upon the place of invocation."""
     if update.message.chat.type == update.message.chat.PRIVATE:
         update.message.reply_photo(
-            photo="https://telegra.ph/file/bd9a6a1ce0e90d423efea.jpg",
+            photo=Media.HELP_PRIVATE,
             caption=Message.HELP_PRIVATE.format(GROUP_NAME=Literal.GROUP_NAME),
         )
     else:
@@ -199,7 +199,7 @@ def send_start(update: Update, context: CallbackContext):
     )
 
     update.message.reply_photo(
-        photo="https://telegra.ph/file/bd9a6a1ce0e90d423efea.jpg",
+        photo=Media.START_PRIVATE,
         caption=Message.START_PRIVATE.format(GROUP_NAME=Literal.GROUP_NAME),
     )
     message = context.bot.send_message(

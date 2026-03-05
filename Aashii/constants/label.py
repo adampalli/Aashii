@@ -1,17 +1,14 @@
 """Contains Label object."""
 
+from .setup import LABELS
+
 
 class Label:
-    """Label contains the labels used in buttons like inline keyboard button."""
+    """Label contains labels used in inline keyboard buttons."""
 
-    APPROVE = "Approve"
-
-    BLOCK = "Block"
-
-    CONNECT = "Connect"
-
-    DECLINE = "Decline"
-
-    PENDING_REQUEST = "#Pending"
-
-    UNBLOCK = "Unblock"
+    APPROVE = LABELS["APPROVE"]
+    BLOCK = LABELS["BLOCK"]
+    CONNECT = LABELS["CONNECT"]
+    DECLINE = LABELS["DECLINE"]
+    PENDING_REQUEST = LABELS["PENDING_REQUEST"]
+    UNBLOCK = LABELS["UNBLOCK"]
