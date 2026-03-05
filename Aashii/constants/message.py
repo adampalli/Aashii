@@ -1,209 +1,54 @@
 """Contains Message object."""
+
 from .label import Label
+from .setup import MESSAGES
 
 
 class Message:
     """Message contains text strings that is used in users interaction."""
 
-    ADMIN_CONNECTED = (
-        "<a href='tg://user?id={ADMIN_ID}'>{ADMIN_FULL_NAME}</a> "
-        "has connected with "
-        "<a href='tg://user?id={USER_ID}'>{USER_FULL_NAME}</a>"
-    )
-
-    ADMIN_CONNECTED_STATUS = (
-        "<b>Voila, an admin has connected with you! 🤝</b>\n\n"
-        "You can start talking now."
-    )
-
-    ALREADY_IN_GROUP = "You're already there in the request group"
-
-    ANNOUNCEMENT_CANCELLED = (
-        "Announcement cancelled in progress.\n"
-        " • <b>Sent</b> : <code>{SENT}</code>\n"
-        " • <b>Failed</b> : <code>{FAILED}</code>\n"
-        " • <b>Progress</b> : <code>{PROGRESS}</code>%."
-    )
-
-    ANNOUNCEMENT_DONE = (
-        "Announcement done.\n"
-        " • <b>Sent</b> : <code>{SENT}</code>\n"
-        " • <b>Failed</b> : <code>{FAILED}</code>\n"
-        " • <b>Total</b> : <code>{TOTAL}</code>."
-    )
-
-    ANNOUNCEMENT_IN_DUE = (
-        "There is already an announcement in due. "
-        "Please /cancel it before starting new one."
-    )
-
-    ANNOUNCEMENT_INIT = (
-        "An announcement has been initiated.\n"
-        "<b>Audience</b> : <code>{TOTAL}</code> users."
-    )
-
-    ANNOUNCEMENT_PULSE = (
-        "Announcement in due.\n"
-        " • <b>Sent</b> : <code>{SENT}</code>\n"
-        " • <b>Failed</b> : <code>{FAILED}</code>\n"
-        " • <b>Progress</b> : <code>{PROGRESS}</code>%."
-    )
-
-    BLOCKED_USER = "<a href='tg://user?id={USER_ID}'>{FULL_NAME}</a> has been blocked successfully."
-
-    BLOCKED_USER_STATUS = "Dang, you were blocked by an admin 🚫\n\n<b>Goodbye</b>"
-
-    BLOCKED_BY_USER = "<a href='tg://user?id={USER_ID}'>{FULL_NAME}</a> has blocked me from contacting them."
-
-    CANCELLED_ANNOUNCEMENT = (
-        "Cancelled announcement at <code>{PROGRESS}</code>% progress."
-    )
-
-    CHAT_LINK_INFO = (
-        "Clicking on the below link(within the next 2 mins) will allow you to place a request to join "
-        "the group. <b>Your answers are auto-moderated and joining requests "
-        "are automatically approved if they are deemed fit. If you don't "
-        "answer them properly with all the details, don't expect to be "
-        "admitted to the group.</b>\n\n"
-        "<i>Note: If you're not on the newest version of Telegram, "
-        "you won't be able to use the following link.</i>\n\n"
-        "{LINK}"
-    )
-
-    DELETE_DONE = "Message deleted successfully!"
-
-    DELETE_FAILED = "I can't delete that message …"
-
-    ENTITY_FORWARD_ANONYMOUS = "<b>Forwarded from {SENDER_NAME}</b>\n{FROM}"
-
-    ENTITY_FORWARD_CHAT = (
-        "<b>Forwarded from <a href='tg://user?id={FROM_CHAT_ID}'>"
-        "{FROM_CHAT_NAME}</a></b>\n"
-        "{FROM}"
-    )
-
-    ENTITY_FORWARD_USER = "<b>Forwarded from <a href='tg://user?id={FROM_USER_ID}'>{FROM_FULL_NAME}</a></b>\n{FROM}"
-
-    ENTITY_FROM = "<b><a href='tg://user?id={USER_ID}'>{FULL_NAME}</a></b>\n\n"
-
-    ERROR = "Oops ! I faced an error : <code>{ERROR}</code>\n<code>{TRACEBACK}</code>"
-    
-    EXHAUSTED_INVITE_LINKS = (
-        "You can only request to join the group once. "
-        "Repeated requests are not appreciated."
-    )
-
-    FALLBACK_STATUS = "Left"
-
-    HELP_GROUP = (
-        "Hey there ! It's <b>Aashii</b> here to help you "
-        "in managing communication between members and admins.\n\n"
-        "Since you are in <b>admins group</b>, the following commands are your exclusive.\n\n"
-        " ⁃ /block - Blocks a user from contacting you.\n"
-        " ⁃ /cancel - Cancels an announcement in progress.\n"
-        " ⁃ /unblock - Unblocks a blocked user.\n\n"
-        "All the above commands should be a reply to a message.\n"
-        "For <code>block</code> and <code>unblock</code>, "
-        "the replied message should be a forwarded message by me.\n\n"
-        "My source code is available at https://github.com/j-arun-mani/Aashii\n"
-        "Enjoy !"
-    )
-
-    HELP_PRIVATE = (
-        "<b>Welcome to A GRoUP Of eBooKz® Support Bot 👋</b>\n\n"
-        "Please note, that this bot is for contacting admins "
-        "of <b>A GRoUP Of eBooKz®</b> Group\n\n"
-        "Click /invite if you want to join the A GRoUP Of eBooKz® Group.\n\n"
-        "<b>Do not request books through this bot!</b>\n"
-        "press Menu button to find out the list of actions you can "
-        "perform using the bot.\n\n"
-        "As soon as an admin connects with you, you'll receive a notification."
-    )
-
-    INFORM_APPROVAL = (
-        "Congratulations, you have been approved and added to "
-        "<b>A GRoUP Of eBooKz® group</b>."
-        "\nPlease read all the pinned messages before making any request.\n"
-    )
-
-    INFORM_DECLINE = (
-        "Your request to join the group was declined due to "
-        "various reasons. No need to contact the bot further."
-    )
-
-    INVALID_COMMAND = "I don't understand what you are talking about …"
-
-    INVALID_REPLY = "I expected this as a reply to a valid message."
-    
-    INVITE_LINKS_RESET = "You are now allowed to generate /invite links."
-
-    JOIN_REQUEST = (
-        "<b>Chat Join Request</b>\n"
-        "Name : <a href='tg://user?id={USER_ID}'>{FULL_NAME}</a>\n"
-        "Username : {USERNAME}\n"
-        "User ID : <code>{USER_ID}</code>\n"
-        "Blocked : {BLOCKED}\n\n"
-    ) + Label.PENDING_REQUEST
-
-    JOIN_REQUEST_APPROVED = (
-        "#Approved by <a href='tg://user?id={USER_ID}'>{FULL_NAME}</a>"
-    )
-
-    JOIN_REQUEST_DECLINED = (
-        "#Declined by <a href='tg://user?id={USER_ID}'>{FULL_NAME}</a>"
-    )
-    
-    KICKED_IN_GROUP = (
-        "You've been banned from the group. "
-        "Hence you're not allowed to generate any invite links."
-    )
-
-    MUTED_IN_GROUP = (
-        "You're already in the group but muted. If you want to get unmuted, "
-        "reply to this message with your concern."
-    )
-
-    NO_ANNOUNCEMENT = "No announcement is in due to cancel."
-
-    NOT_LINKED = "I don't think that message corresponds to any user."
-
-    NOT_PRIVATE_COMMAND = "Sorry, this command is meant to be used in admins group."
-    
-    RESET_COUNT = "<a href='tg://user?id={USER_ID}'>{FULL_NAME}</a> invite links count has been reset."
-
-    START_GROUP = "I'm all alive and functioning."
-
-    START_PRIVATE = (
-        "<b>Welcome to A GRoUP Of eBooKz® Support Bot 👋</b>\n\n"
-        "Please note, that this bot is for contacting admins "
-        "of <b>A GRoUP Of eBooKz®</b> Group\n\n"
-        "Click /invite if you want to join the A GRoUP Of eBooKz® Group.\n\n"
-        "<b>Do not request books through this bot!</b>\n"
-        "press Menu button to find out the list of actions you can "
-        "perform using the bot.\n\n"
-        "As soon as an admin connects with you, you'll receive a notification."
-    )
-
-    UNBLOCKED_USER = (
-        "<a href='tg://user?id={USER_ID}'>{FULL_NAME}</a> has been unblocked."
-    )
-
-    UNBLOCKED_USER_STATUS = "Congratulations! You were unblocked by an admin!"
-
-    USER = (
-        "Name : <a href='tg://user?id={USER_ID}'>{FULL_NAME}</a>\n"
-        "Username : {USERNAME}\n"
-        "User ID : <code>{USER_ID}</code>\n"
-        "Membership : {MEMBERSHIP}\n"
-        "Blocked : {BLOCKED}"
-    )
-
-    USER_CONNECTED = (
-        "<a href='tg://user?id={USER_ID}'>{FULL_NAME}</a> has started the bot.\n"
-        "Username : {USERNAME}\n"
-        "User ID : <code>{USER_ID}</code>\n"
-        "Membership : {MEMBERSHIP}\n"
-        "Blocked : {BLOCKED}"
-    )
-
-    USER_NOT_FOUND = "I can't find the user in my database, something's wrong ..."
+    ADMIN_CONNECTED = MESSAGES["ADMIN_CONNECTED"]
+    ADMIN_CONNECTED_STATUS = MESSAGES["ADMIN_CONNECTED_STATUS"]
+    ALREADY_IN_GROUP = MESSAGES["ALREADY_IN_GROUP"]
+    ANNOUNCEMENT_CANCELLED = MESSAGES["ANNOUNCEMENT_CANCELLED"]
+    ANNOUNCEMENT_DONE = MESSAGES["ANNOUNCEMENT_DONE"]
+    ANNOUNCEMENT_IN_DUE = MESSAGES["ANNOUNCEMENT_IN_DUE"]
+    ANNOUNCEMENT_INIT = MESSAGES["ANNOUNCEMENT_INIT"]
+    ANNOUNCEMENT_PULSE = MESSAGES["ANNOUNCEMENT_PULSE"]
+    BLOCKED_USER = MESSAGES["BLOCKED_USER"]
+    BLOCKED_USER_STATUS = MESSAGES["BLOCKED_USER_STATUS"]
+    BLOCKED_BY_USER = MESSAGES["BLOCKED_BY_USER"]
+    CANCELLED_ANNOUNCEMENT = MESSAGES["CANCELLED_ANNOUNCEMENT"]
+    CHAT_LINK_INFO = MESSAGES["CHAT_LINK_INFO"]
+    DELETE_DONE = MESSAGES["DELETE_DONE"]
+    DELETE_FAILED = MESSAGES["DELETE_FAILED"]
+    ENTITY_FORWARD_ANONYMOUS = MESSAGES["ENTITY_FORWARD_ANONYMOUS"]
+    ENTITY_FORWARD_CHAT = MESSAGES["ENTITY_FORWARD_CHAT"]
+    ENTITY_FORWARD_USER = MESSAGES["ENTITY_FORWARD_USER"]
+    ENTITY_FROM = MESSAGES["ENTITY_FROM"]
+    ERROR = MESSAGES["ERROR"]
+    EXHAUSTED_INVITE_LINKS = MESSAGES["EXHAUSTED_INVITE_LINKS"]
+    FALLBACK_STATUS = MESSAGES["FALLBACK_STATUS"]
+    HELP_GROUP = MESSAGES["HELP_GROUP"]
+    HELP_PRIVATE = MESSAGES["HELP_PRIVATE"]
+    INFORM_APPROVAL = MESSAGES["INFORM_APPROVAL"]
+    INFORM_DECLINE = MESSAGES["INFORM_DECLINE"]
+    INVALID_COMMAND = MESSAGES["INVALID_COMMAND"]
+    INVALID_REPLY = MESSAGES["INVALID_REPLY"]
+    INVITE_LINKS_RESET = MESSAGES["INVITE_LINKS_RESET"]
+    JOIN_REQUEST = MESSAGES["JOIN_REQUEST"] + Label.PENDING_REQUEST
+    JOIN_REQUEST_APPROVED = MESSAGES["JOIN_REQUEST_APPROVED"]
+    JOIN_REQUEST_DECLINED = MESSAGES["JOIN_REQUEST_DECLINED"]
+    KICKED_IN_GROUP = MESSAGES["KICKED_IN_GROUP"]
+    MUTED_IN_GROUP = MESSAGES["MUTED_IN_GROUP"]
+    NO_ANNOUNCEMENT = MESSAGES["NO_ANNOUNCEMENT"]
+    NOT_LINKED = MESSAGES["NOT_LINKED"]
+    NOT_PRIVATE_COMMAND = MESSAGES["NOT_PRIVATE_COMMAND"]
+    RESET_COUNT = MESSAGES["RESET_COUNT"]
+    START_GROUP = MESSAGES["START_GROUP"]
+    START_PRIVATE = MESSAGES["START_PRIVATE"]
+    UNBLOCKED_USER = MESSAGES["UNBLOCKED_USER"]
+    UNBLOCKED_USER_STATUS = MESSAGES["UNBLOCKED_USER_STATUS"]
+    USER = MESSAGES["USER"]
+    USER_CONNECTED = MESSAGES["USER_CONNECTED"]
+    USER_NOT_FOUND = MESSAGES["USER_NOT_FOUND"]

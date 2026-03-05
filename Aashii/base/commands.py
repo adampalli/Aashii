@@ -2,7 +2,7 @@
 
 from telegram import ChatMember, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
-from Aashii.constants import Button, Literal, Message
+from Aashii.constants import Button, Literal, Media, Message
 from Aashii.utils.broadcast import announce
 from Aashii.utils.misc import (
     block_user,
@@ -121,9 +121,6 @@ def invite_user(update: Update, context: CallbackContext):
 
     if in_group:
         update.message.reply_html(Message.ALREADY_IN_GROUP)
-        update.message.reply_sticker(
-            sticker="CAACAgUAAxkBAAEMESVhIUl4D7eR_8deoYsSIMgw__HWDAAC7QIAAuiU4FRdXc-plxm3OiAE",
-        )
     elif is_kicked:
         update.message.reply_html(Message.KICKED_IN_GROUP)
     elif is_restricted:
@@ -165,7 +162,7 @@ def send_help(update: Update, context: CallbackContext):
     group depending upon the place of invocation."""
     if update.message.chat.type == update.message.chat.PRIVATE:
         update.message.reply_photo(
-            photo="https://telegra.ph/file/bd9a6a1ce0e90d423efea.jpg",
+            photo=Media.HELP_PRIVATE,
             caption=Message.HELP_PRIVATE.format(GROUP_NAME=Literal.GROUP_NAME),
         )
     else:
@@ -199,7 +196,7 @@ def send_start(update: Update, context: CallbackContext):
     )
 
     update.message.reply_photo(
-        photo="https://telegra.ph/file/bd9a6a1ce0e90d423efea.jpg",
+        photo=Media.START_PRIVATE,
         caption=Message.START_PRIVATE.format(GROUP_NAME=Literal.GROUP_NAME),
     )
     message = context.bot.send_message(
@@ -207,12 +204,7 @@ def send_start(update: Update, context: CallbackContext):
         text=text,
         reply_markup=keyboard,
     )
-    sticker = context.bot.send_sticker(
-        chat_id=Literal.ADMINS_GROUP_ID,
-        sticker="CAACAgUAAxkBAAEBzthgDMo3xjj0hFJALd0m8zHmwh8ozAACxQEAAnQiSFStsLxBN7oSth4E",
-    )
     database.add_user_message(update.message.message_id, user_id, message.message_id)
-    database.add_user_message(update.message.message_id, user_id, sticker.message_id)
 
 
 def static_command(update: Update, context: CallbackContext):
