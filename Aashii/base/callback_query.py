@@ -2,7 +2,7 @@
 
 from telegram import InlineKeyboardMarkup, Update
 from telegram.ext import CallbackContext
-from Aashii.constants import Button, Label, Literal, Message
+from Aashii.constants import Button, Label, Literal, Media, Message
 from Aashii.utils.misc import (
     block_user,
     get_membership,
@@ -82,7 +82,7 @@ def connect_admin_cb(update: Update, context: CallbackContext):
         USER_FULL_NAME=full_name,
     )
     msg = context.bot.send_photo(
-        photo="https://telegra.ph/file/70dc7aec0bb44b85f7c62.jpg",
+        photo=Media.ADMIN_CONNECTED,
         chat_id=user_id,
         caption=Message.ADMIN_CONNECTED_STATUS,
     )

@@ -1,6 +1,7 @@
 """Contains commands used by the bot."""
 
 from telegram import BotCommand
+from Aashii.constants.setup import COMMAND_DESCRIPTIONS
 from Aashii.utils.misc import dehtml
 
 
@@ -13,20 +14,20 @@ def _command(fname):
 
 commands = {
     "admins": [
-        BotCommand("announce", "Announce all users"),
-        BotCommand("block", "Block the user"),
-        BotCommand("cancel", "Cancel the announcement"),
-        BotCommand("delete", "Delete the message of admin"),
-        BotCommand("reset", "Reset the invite links count"),
-        BotCommand("unblock", "Unblock the user"),
-        BotCommand("whois", "Get the details of replied user"),
+        BotCommand("announce", COMMAND_DESCRIPTIONS["announce"]),
+        BotCommand("block", COMMAND_DESCRIPTIONS["block"]),
+        BotCommand("cancel", COMMAND_DESCRIPTIONS["cancel"]),
+        BotCommand("delete", COMMAND_DESCRIPTIONS["delete"]),
+        BotCommand("reset", COMMAND_DESCRIPTIONS["reset"]),
+        BotCommand("unblock", COMMAND_DESCRIPTIONS["unblock"]),
+        BotCommand("whois", COMMAND_DESCRIPTIONS["whois"]),
     ],
     "all": [
-        BotCommand("help", "Help on usage"),
-        BotCommand("start", "Start the adventure"),
+        BotCommand("help", COMMAND_DESCRIPTIONS["help"]),
+        BotCommand("start", COMMAND_DESCRIPTIONS["start"]),
     ],
     "private": [
-        ("invite", "Request to join A GRoUP Of eBooKz®"),
-        ("query", "General queries, appeals etc"),
-    ],  # FIXME: Keep it hardcoded? [_command(fname) for fname in os.listdir("data/static")],
+        ("invite", COMMAND_DESCRIPTIONS["invite"]),
+        ("query", COMMAND_DESCRIPTIONS["query"]),
+    ],
 }
