@@ -18,3 +18,6 @@ CREATE TABLE invite_links (
 
 INSERT INTO invite_links (SELECT * from tempinvite);
 DROP TABLE tempinvite;
+
+
+ALTER TABLE users ADD COLUMN IF NOT EXISTS decision_status TEXT DEFAULT 'unknown' NOT NULL;

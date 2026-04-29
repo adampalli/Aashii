@@ -15,6 +15,7 @@ from Aashii.base.commands import (
     cancel_announcement,
     delete,
     invite_user,
+    list_users,
     reset,
     send_help,
     send_start,
@@ -81,6 +82,13 @@ handlers = {
             {
                 "command": "invite",
                 "callback": invite_user,
+                "filters": ~Filters.chat(Literal.CHAT_GROUP_ID),
+            },
+        ),
+        (
+            {
+                "command": "listusers",
+                "callback": list_users,
                 "filters": ~Filters.chat(Literal.CHAT_GROUP_ID),
             },
         ),
