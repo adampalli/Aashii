@@ -16,7 +16,9 @@
     "help": "Help on usage",
     "start": "Start the adventure",
     "invite": "Request to join A GRoUP Of eBooKz®",
-    "query": "General queries, appeals etc"
+        BotCommand("delete", COMMAND_DESCRIPTIONS["delete"]),
+        BotCommand("listusers", COMMAND_DESCRIPTIONS["listusers"]),
+        BotCommand("reset", COMMAND_DESCRIPTIONS["reset"]),
   },
   "messages": {
     "ADMIN_CONNECTED": "<a href='tg://user?id={ADMIN_ID}'>{ADMIN_FULL_NAME}</a> has connected with <a href='tg://user?id={USER_ID}'>{USER_FULL_NAME}</a>",
@@ -63,7 +65,9 @@
     "UNBLOCKED_USER_STATUS": "Congratulations! You were unblocked by an admin!",
     "USER": "Name : <a href='tg://user?id={USER_ID}'>{FULL_NAME}</a>\nUsername : {USERNAME}\nUser ID : <code>{USER_ID}</code>\nMembership : {MEMBERSHIP}\nBlocked : {BLOCKED}",
     "USER_CONNECTED": "<a href='tg://user?id={USER_ID}'>{FULL_NAME}</a> has started the bot.\nUsername : {USERNAME}\nUser ID : <code>{USER_ID}</code>\nMembership : {MEMBERSHIP}\nBlocked : {BLOCKED}",
-    "USER_NOT_FOUND": "I can't find the user in my database, something's wrong ..."
+    "invite": "Request to join A GRoUP Of eBooKz®",
+    "query": "General queries, appeals etc",
+    "listusers": "List blocked/approved/declined users"
   },
   "labels": {
     "APPROVE": "Approve",

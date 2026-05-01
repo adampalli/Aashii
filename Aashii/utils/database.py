@@ -188,6 +188,35 @@ class Database:
         cur.close()
         self.connection.commit()
 
+
+    def get_users_by_blocked(self, blocked: bool):
+        """Return users filtered by blocked state."""
+        cur = self.connection.cursor()
+        cur.execute(Query.GET_USERS_BY_BLOCKED, {"blocked": blocked})
+        users = [(user_id, username, full_name) for (user_id, username, full_name) in cur]
+        cur.close()
+        return users
+
+    def get_users_by_decision_status(self, decision_status: str):
+        """Return users filtered by decision status."""
+        cur = self.connection.cursor()
+        cur.execute(
+            Query.GET_USERS_BY_DECISION_STATUS,
+            {"decision_status": decision_status},
+        )
+        users = [(user_id, username, full_name) for (user_id, username, full_name) in cur]
+        cur.close()
+        return users
+
+    def set_user_decision_status(self, user_id: int, decision_status: str):
+        """Set the latest approval decision status for given user."""
+        cur = self.connection.cursor()
+        cur.execute(
+            Query.SET_USER_DECISION_STATUS,
+            {"user_id": user_id, "decision_status": decision_status},
+        )
+        self.connection.commit()
+        cur.close()
     def set_user_blocked(self, user_id: int, blocked: bool):
         """Set the user status as True if they are blocked and False on otherwise."""
         cur = self.connection.cursor()

@@ -26,10 +26,12 @@ def answer_join_request(update: Update, context: CallbackContext):
         status = f"{Message.JOIN_REQUEST_APPROVED}"
         context.bot.approve_chat_join_request(Literal.CHAT_GROUP_ID, user_id)
         context.bot.send_message(user_id, Message.INFORM_APPROVAL)
+        database.set_user_decision_status(user_id, "approved")
     else:
         status = f"{Message.JOIN_REQUEST_DECLINED}"
         context.bot.decline_chat_join_request(Literal.CHAT_GROUP_ID, user_id)
         context.bot.send_message(user_id, Message.INFORM_DECLINE)
+        database.set_user_decision_status(user_id, "declined")
 
     database.set_invite_pending(user_id, False)
     context.bot.delete_message(user_id, msg_id)

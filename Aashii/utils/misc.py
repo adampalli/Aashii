@@ -109,6 +109,7 @@ def request_join(update: Update, context: CallbackContext):
 
     if blocked:
         context.bot.decline_chat_join_request(Literal.CHAT_GROUP_ID, user_id)
+        database.set_user_decision_status(user_id, "declined")
         return
 
     context.bot_data.pop("lastUserId", None)

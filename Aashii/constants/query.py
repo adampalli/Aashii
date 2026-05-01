@@ -73,6 +73,15 @@ class Query:
 
     GET_USERS = "SELECT user_id FROM users;"
 
+    GET_USERS_BY_BLOCKED = (
+        "SELECT user_id, username, full_name FROM users WHERE blocked = %(blocked)s ORDER BY user_id;"
+    )
+
+    GET_USERS_BY_DECISION_STATUS = (
+        "SELECT user_id, username, full_name FROM users "
+        "WHERE decision_status = %(decision_status)s ORDER BY user_id;"
+    )
+
     RESET_INVITE_LINKS = (
         "UPDATE invite_links SET links_count = 0 WHERE user_id = %(user_id)s;"
     )
@@ -83,4 +92,8 @@ class Query:
 
     SET_USER_BLOCKED = (
         "UPDATE users SET blocked = %(blocked)s WHERE user_id = %(user_id)s;"
+    )
+
+    SET_USER_DECISION_STATUS = (
+        "UPDATE users SET decision_status = %(decision_status)s WHERE user_id = %(user_id)s;"
     )

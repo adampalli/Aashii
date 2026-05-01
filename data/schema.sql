@@ -2,7 +2,8 @@ CREATE TABLE IF NOT EXISTS users (
     user_id BIGINT PRIMARY KEY,
     username TEXT,
     full_name TEXT NOT NULL,
-    blocked BOOL DEFAULT FALSE NOT NULL
+    blocked BOOL DEFAULT FALSE NOT NULL,
+    decision_status TEXT DEFAULT 'unknown' NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS from_admins (

@@ -11,3 +11,11 @@ This bot is a fork of https://github.com/j-arun-mani/Aashii.
 ## Deployment guides
 
 - [Host on Oracle Cloud Always Free](docs/oracle-cloud-always-free.md)
+## Admin moderation commands
+
+- `/listusers blocked` — list all blocked users.
+- `/listusers approved` — list users whose join requests were approved.
+- `/listusers declined` — list users whose join requests were declined.
+- `/listusers all` — print blocked, approved, and declined sections together.
+
+> If you are upgrading an existing deployment, run `data/migrate.sql` so the `users.decision_status` column exists before using these filters.
