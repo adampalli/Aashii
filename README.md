@@ -11,8 +11,6 @@ This bot is a fork of https://github.com/j-arun-mani/Aashii.
 ## Deployment guides
 
 - [Host on Oracle Cloud Always Free](docs/oracle-cloud-always-free.md)
-
-
 ## Admin moderation commands
 
 - `/listusers blocked` — list all blocked users.
