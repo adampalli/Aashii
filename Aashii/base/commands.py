@@ -245,6 +245,9 @@ def unblock_user_cl(update: Update, context: CallbackContext):
 
 
 
+LIST_USERS_LIMIT = 50
+
+
 @check_is_group_command
 def list_users(update: Update, context: CallbackContext):
     """List blocked/approved/declined users."""
@@ -252,32 +255,39 @@ def list_users(update: Update, context: CallbackContext):
     category = context.args[0].lower() if context.args else "all"
 
     if category == "blocked":
-        users = database.get_users_by_blocked(True)
+        users = database.get_users_by_blocked(True, LIST_USERS_LIMIT)
         heading = Message.LIST_BLOCKED_USERS
     elif category == "approved":
-        users = database.get_users_by_decision_status("approved")
+        users = database.get_users_by_decision_status("approved", LIST_USERS_LIMIT)
         heading = Message.LIST_APPROVED_USERS
     elif category == "declined":
-        users = database.get_users_by_decision_status("declined")
+        users = database.get_users_by_decision_status("declined", LIST_USERS_LIMIT)
         heading = Message.LIST_DECLINED_USERS
     elif category == "all":
-        blocked = database.get_users_by_blocked(True)
-        approved = database.get_users_by_decision_status("approved")
-        declined = database.get_users_by_decision_status("declined")
-        lines = [Message.LIST_BLOCKED_USERS]
-        lines.extend(_format_users(blocked))
-        lines.append("")
-        lines.append(Message.LIST_APPROVED_USERS)
-        lines.extend(_format_users(approved))
-        lines.append("")
-        lines.append(Message.LIST_DECLINED_USERS)
-        lines.extend(_format_users(declined))
-        update.message.reply_html("\n".join(lines))
+        _reply_user_list(
+            update,
+            Message.LIST_BLOCKED_USERS,
+            database.get_users_by_blocked(True, LIST_USERS_LIMIT),
+        )
+        _reply_user_list(
+            update,
+            Message.LIST_APPROVED_USERS,
+            database.get_users_by_decision_status("approved", LIST_USERS_LIMIT),
+        )
+        _reply_user_list(
+            update,
+            Message.LIST_DECLINED_USERS,
+            database.get_users_by_decision_status("declined", LIST_USERS_LIMIT),
+        )
         return
     else:
         update.message.reply_html(Message.LIST_USERS_USAGE)
         return
 
+    _reply_user_list(update, heading, users)
+
+
+def _reply_user_list(update: Update, heading, users):
     lines = [heading]
     lines.extend(_format_users(users))
     update.message.reply_html("\n".join(lines))

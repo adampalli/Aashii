@@ -74,12 +74,13 @@ class Query:
     GET_USERS = "SELECT user_id FROM users;"
 
     GET_USERS_BY_BLOCKED = (
-        "SELECT user_id, username, full_name FROM users WHERE blocked = %(blocked)s ORDER BY user_id;"
+        "SELECT user_id, username, full_name FROM users "
+        "WHERE blocked = %(blocked)s ORDER BY user_id DESC LIMIT %(limit)s;"
     )
 
     GET_USERS_BY_DECISION_STATUS = (
         "SELECT user_id, username, full_name FROM users "
-        "WHERE decision_status = %(decision_status)s ORDER BY user_id;"
+        "WHERE decision_status = %(decision_status)s ORDER BY user_id DESC LIMIT %(limit)s;"
     )
 
     RESET_INVITE_LINKS = (
