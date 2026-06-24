@@ -189,20 +189,20 @@ class Database:
         self.connection.commit()
 
 
-    def get_users_by_blocked(self, blocked: bool):
+    def get_users_by_blocked(self, blocked: bool, limit: int):
         """Return users filtered by blocked state."""
         cur = self.connection.cursor()
-        cur.execute(Query.GET_USERS_BY_BLOCKED, {"blocked": blocked})
+        cur.execute(Query.GET_USERS_BY_BLOCKED, {"blocked": blocked, "limit": limit})
         users = [(user_id, username, full_name) for (user_id, username, full_name) in cur]
         cur.close()
         return users
 
-    def get_users_by_decision_status(self, decision_status: str):
+    def get_users_by_decision_status(self, decision_status: str, limit: int):
         """Return users filtered by decision status."""
         cur = self.connection.cursor()
         cur.execute(
             Query.GET_USERS_BY_DECISION_STATUS,
-            {"decision_status": decision_status},
+            {"decision_status": decision_status, "limit": limit},
         )
         users = [(user_id, username, full_name) for (user_id, username, full_name) in cur]
         cur.close()
