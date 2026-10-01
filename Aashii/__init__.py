@@ -11,3 +11,5 @@ logging.basicConfig(
     format="%(asctime)s -%(levelname)s - %(message)s",
     level=logging.INFO,
 )
+# httpx logs every request URL at INFO, and those URLs contain the bot token.
+logging.getLogger("httpx").setLevel(logging.WARNING)
