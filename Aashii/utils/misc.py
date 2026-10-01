@@ -2,10 +2,9 @@
 
 import logging
 import re
-import traceback
 import unicodedata
 from telegram import Bot, InlineKeyboardMarkup, Update
-from telegram.error import Forbidden
+from telegram.error import Forbidden, TelegramError
 from telegram.ext import CallbackContext
 from Aashii.constants import Button, Literal, Media, Message
 
@@ -86,32 +85,16 @@ def dehtml(text: str):
 
 
 async def error_handler(_: object, context: CallbackContext):
-    """Handle the known errors and exceptions."""
-    error = str(context.error)
-    tb = "".join(
-        traceback.format_tb(context.error.__traceback__, Literal.TRACEBACK_VALUE)
-    )
-    logging.error(context.error)
-    return
-    error_text = Message.ERROR.format(ERROR=error, TRACEBACK=tb)
-    if Literal.INFORM_ERROR:
-        try:
-            await context.bot.send_message(
-                chat_id=Literal.ADMINS_GROUP_ID,
-                text=error_text,
-            )
-        except:
-            logging.error("%s\n%s", error, tb)
-    else:
-        logging.error("%s\n%s", error, tb)
+    """Log errors raised by handlers, with their traceback."""
+    logging.error("Error while handling an update", exc_info=context.error)
 
 
 async def get_membership(user_id: int, bot: Bot):
     """Return membership of user."""
     try:
         mem = await bot.get_chat_member(Literal.CHAT_GROUP_ID, user_id)
-    except Exception as e:
-        print(e)
+    except TelegramError as e:
+        logging.warning("Could not get membership of %s: %s", user_id, e)
         membership = Message.FALLBACK_STATUS
     else:
         membership = mem.status.title()
@@ -142,9 +125,11 @@ def get_user_src_message(update: Update, context: CallbackContext):
 async def request_join(update: Update, context: CallbackContext):
     """Send a message in admins group to request addition in chat group."""
     database = context.bot_data["database"]
-    user_id = update.chat_join_request.from_user.id
-    username = update.chat_join_request.from_user.username
-    username = f"@{username}" if username else None
+    user = update.chat_join_request.from_user
+    user_id = user.id
+    username = f"@{user.username}" if user.username else None
+    # Join requests carry no message, so add_user has not stored this user yet.
+    database.add_user(user_id, username, user.full_name)
     blocked = database.get_user_blocked(user_id)
 
     if blocked:
@@ -153,7 +138,7 @@ async def request_join(update: Update, context: CallbackContext):
         return
 
     context.bot_data.pop("lastUserId", None)
-    full_name = update.chat_join_request.from_user.full_name
+    full_name = user.full_name
     last_message_id = database.get_last_user_message_id(user_id)
     text = Message.JOIN_REQUEST.format(
         FULL_NAME=full_name,

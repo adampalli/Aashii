@@ -1,6 +1,8 @@
 """Contains handlers related to commands."""
 
+from pathlib import Path
 from telegram import ChatMember, InlineKeyboardMarkup, Update
+from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 from Aashii.constants import Button, Literal, Media, Message
 from Aashii.utils.broadcast import announce
@@ -16,6 +18,8 @@ from Aashii.utils.wrappers import (
     check_user_status,
 )
 
+STATIC_DIR = Path("data/static")
+
 
 @check_is_group_command
 @check_is_reply_verbose
@@ -29,7 +33,7 @@ async def announce_users(update: Update, context: CallbackContext):
     context.bot_data["announcement"] = update.message.reply_to_message
     context.bot_data["sent"] = context.bot_data["failed"] = 0
     context.bot_data["users"], context.bot_data["total"] = database.get_users()
-    step = len(context.bot_data) // Literal.STEP
+    step = context.bot_data["total"] // Literal.STEP
     context.bot_data["steps"] = [(step * i) for i in range(1, Literal.STEP + 1)]
     text = Message.ANNOUNCEMENT_INIT.format(TOTAL=context.bot_data["total"])
     context.bot_data["log_message"] = await update.message.reply_html(text)
@@ -70,7 +74,7 @@ async def cancel_announcement(update: Update, context: CallbackContext):
         sent = context.bot_data.pop("sent")
         failed = context.bot_data.pop("failed")
         total = context.bot_data.pop("total")
-        percent = int(((sent + failed) / total) * 100)
+        percent = int(((sent + failed) / max(total, 1)) * 100)
         edit_text = Message.ANNOUNCEMENT_CANCELLED.format(
             SENT=sent, FAILED=failed, PROGRESS=percent
         )
@@ -97,7 +101,7 @@ async def delete(update: Update, context: CallbackContext):
     if user_id:
         try:
             await context.bot.delete_message(user_id, dest_msg_id)
-        except:
+        except TelegramError:
             await update.message.reply_html(Message.DELETE_FAILED)
         else:
             await update.message.reply_html(Message.DELETE_DONE)
@@ -210,13 +214,14 @@ async def send_start(update: Update, context: CallbackContext):
 
 async def static_command(update: Update, context: CallbackContext):
     """Send static command mentioned in static folder."""
-    command = update.message.text[1:].split("@")[0]
-    try:
-        text = open(f"data/static/{command}").read()
-    except FileNotFoundError:
-        await update.message.reply_html(Message.INVALID_COMMAND)
-    else:
+    command = update.message.text.split()[0][1:].split("@")[0]
+    static_files = {path.name for path in STATIC_DIR.iterdir() if path.is_file()}
+
+    if command in static_files:
+        text = (STATIC_DIR / command).read_text(encoding="utf-8")
         await update.message.reply_html(text)
+    else:
+        await update.message.reply_html(Message.INVALID_COMMAND)
 
     if update.message.chat.type != update.message.chat.PRIVATE:
         context.bot_data["lastUserId"] = Literal.ADMINS_GROUP_ID
@@ -242,8 +247,6 @@ async def unblock_user_cl(update: Update, context: CallbackContext):
     message = await update.message.reply_html(text)
     database.add_admin_message(update.message.message_id, user_id, msg_id)
     database.add_user_message(1, user_id, message.message_id)
-
-
 
 
 LIST_USERS_LIMIT = 50
@@ -306,6 +309,7 @@ def _format_users(users):
         )
         for (user_id, username, full_name) in users
     ]
+
 
 @check_is_group_command
 async def whois(update: Update, context: CallbackContext):

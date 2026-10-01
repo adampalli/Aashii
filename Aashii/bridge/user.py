@@ -1,6 +1,6 @@
 """Contains functions to send messages from users to admins."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from telegram import Update
 from telegram.constants import ChatAction
 from telegram.ext import CallbackContext
@@ -42,7 +42,7 @@ async def _send_admins(context: CallbackContext):
 async def _send_invite_link(update: Update, context: CallbackContext):
     database = context.bot_data["database"]
     user_id = update.message.from_user.id
-    expire = datetime.today() + timedelta(days=0, minutes=10)
+    expire = datetime.now(timezone.utc) + timedelta(minutes=10)
     link = await context.bot.create_chat_invite_link(
         chat_id=Literal.CHAT_GROUP_ID, expire_date=expire, creates_join_request=True
     )

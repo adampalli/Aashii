@@ -38,8 +38,6 @@ class Query:
         "SELECT links_count FROM invite_links WHERE user_id = %(user_id)s;"
     )
 
-    GET_INVITE_PENDING = "SELECT pending FROM invite_links WHERE user_id = %(user_id)s;"
-
     GET_INVITE_MESSAGE_ID = (
         "SELECT message_id FROM invite_links WHERE user_id = %(user_id)s;"
     )

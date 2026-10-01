@@ -2,7 +2,6 @@
 
 import logging
 
-# import sentry_sdk
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import Application, Defaults
@@ -10,16 +9,6 @@ from telegram.ext import Application, Defaults
 from Aashii.constants import Scope
 from Aashii.utils.database import Database
 from Aashii.utils.misc import error_handler
-
-# sentry_sdk.init(
-#     "https://c2099f5cd64c41f0aa071d8e0844a7e8@o915566.ingest.sentry.io/5857817",
-#     # Set traces_sample_rate to 1.0 to capture 100%
-#     # of transactions for performance monitoring.
-#     # We recommend adjusting this value in production.
-#     release="BookCrushContactBot@2.0.1",
-#     traces_sample_rate=0.7,
-#     debug=False,
-# )
 
 ALLOWED_UPDATES = [
     Update.CALLBACK_QUERY,

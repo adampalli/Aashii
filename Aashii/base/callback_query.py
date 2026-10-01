@@ -1,6 +1,7 @@
 """Functions to handle callback query."""
 
 from telegram import InlineKeyboardMarkup, Update
+from telegram.error import TelegramError
 from telegram.ext import CallbackContext
 from Aashii.constants import Button, Label, Literal, Media, Message
 from Aashii.utils.misc import (
@@ -34,7 +35,11 @@ async def answer_join_request(update: Update, context: CallbackContext):
         database.set_user_decision_status(user_id, "declined")
 
     database.set_invite_pending(user_id, False)
-    await context.bot.delete_message(user_id, msg_id)
+    if msg_id:
+        try:
+            await context.bot.delete_message(user_id, msg_id)
+        except TelegramError:
+            pass  # Already deleted, or too old to delete.
     text = update.callback_query.message.text_html_urled.replace(
         Label.PENDING_REQUEST, ""
     )
@@ -88,7 +93,6 @@ async def connect_admin_cb(update: Update, context: CallbackContext):
         chat_id=user_id,
         caption=Message.ADMIN_CONNECTED_STATUS,
     )
-    await update.callback_query.answer()
     message = await message.reply_html(text)
     database.add_admin_message(0, user_id, msg.message_id)
     database.add_user_message(1, user_id, message.message_id)
