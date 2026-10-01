@@ -16,12 +16,12 @@ def __announcement_done(context: CallbackContext):
     context.job.schedule_removal()
 
 
-def __announcement_progress(user_id: int, context: CallbackContext):
+async def __announcement_progress(user_id: int, context: CallbackContext):
     announcement = context.bot_data["announcement"]
     database = context.bot_data["database"]
 
     try:
-        msg = announcement.copy(user_id)
+        msg = await announcement.copy(user_id)
     except Exception as e:
         logging.error(str(e))
         context.bot_data["failed"] += 1
@@ -44,7 +44,7 @@ def __announcement_pulse(sent, failed, total, steps):
     return text
 
 
-def announce(context: CallbackContext):
+async def announce(context: CallbackContext):
     """Announce the message to all users one by one."""
     log_message = context.bot_data["log_message"]
     sent = context.bot_data["sent"]
@@ -59,8 +59,8 @@ def announce(context: CallbackContext):
         text = Message.ANNOUNCEMENT_DONE.format(SENT=sent, FAILED=failed, TOTAL=total)
         __announcement_done(context)
     else:
-        __announcement_progress(user_id, context)
+        await __announcement_progress(user_id, context)
         text = __announcement_pulse(sent, failed, total, steps)
     finally:
         if text:
-            log_message.edit_text(text)
+            await log_message.edit_text(text)

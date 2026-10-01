@@ -19,10 +19,10 @@ from Aashii.utils.wrappers import (
 
 @check_is_group_command
 @check_is_reply_verbose
-def announce_users(update: Update, context: CallbackContext):
+async def announce_users(update: Update, context: CallbackContext):
     """Announce the replied message to every user in database."""
     if context.bot_data.get("announcement"):
-        update.message.reply_html(Message.ANNOUNCEMENT_IN_DUE)
+        await update.message.reply_html(Message.ANNOUNCEMENT_IN_DUE)
         return
 
     database = context.bot_data["database"]
@@ -32,14 +32,14 @@ def announce_users(update: Update, context: CallbackContext):
     step = len(context.bot_data) // Literal.STEP
     context.bot_data["steps"] = [(step * i) for i in range(1, Literal.STEP + 1)]
     text = Message.ANNOUNCEMENT_INIT.format(TOTAL=context.bot_data["total"])
-    context.bot_data["log_message"] = update.message.reply_html(text)
+    context.bot_data["log_message"] = await update.message.reply_html(text)
     context.job_queue.run_repeating(
         announce, interval=Literal.ANNOUNCEMENT_INTERVAL, name="announcement"
     )
 
 
 @check_is_group_command
-def block_user_cl(update: Update, context: CallbackContext):
+async def block_user_cl(update: Update, context: CallbackContext):
     """Block the user from contacting the admins based on command."""
     database = context.bot_data["database"]
 
@@ -48,20 +48,20 @@ def block_user_cl(update: Update, context: CallbackContext):
     else:
         user_id, _ = get_user_src_message(update, context)
         if not user_id:
-            update.message.reply_html(Message.INVALID_REPLY)
+            await update.message.reply_html(Message.INVALID_REPLY)
             return
 
-    msg_id = block_user(user_id, context)
+    msg_id = await block_user(user_id, context)
 
     full_name = database.get_user_full_name(user_id)
     text = Message.BLOCKED_USER.format(USER_ID=user_id, FULL_NAME=full_name)
-    message = update.message.reply_html(text)
+    message = await update.message.reply_html(text)
     database.add_admin_message(update.message.message_id, user_id, msg_id)
     database.add_user_message(1, user_id, message.message_id)
 
 
 @check_is_group_command
-def cancel_announcement(update: Update, context: CallbackContext):
+async def cancel_announcement(update: Update, context: CallbackContext):
     """Cancel an announcement if scheduled."""
     if context.bot_data.pop("announcement", None):
         job = context.job_queue.get_jobs_by_name("announcement")[0]
@@ -75,17 +75,17 @@ def cancel_announcement(update: Update, context: CallbackContext):
             SENT=sent, FAILED=failed, PROGRESS=percent
         )
         text = Message.CANCELLED_ANNOUNCEMENT.format(PROGRESS=percent)
-        log_message.edit_text(edit_text)
+        await log_message.edit_text(edit_text)
         del context.bot_data["users"]
     else:
         text = Message.NO_ANNOUNCEMENT
 
-    update.message.reply_html(text)
+    await update.message.reply_html(text)
 
 
 @check_is_group_command
 @check_is_reply_verbose
-def delete(update: Update, context: CallbackContext):
+async def delete(update: Update, context: CallbackContext):
     """Delete the message sent by admins to users."""
     database = context.bot_data["database"]
     reply = update.message.reply_to_message
@@ -96,46 +96,46 @@ def delete(update: Update, context: CallbackContext):
 
     if user_id:
         try:
-            context.bot.delete_message(user_id, dest_msg_id)
+            await context.bot.delete_message(user_id, dest_msg_id)
         except:
-            update.message.reply_html(Message.DELETE_FAILED)
+            await update.message.reply_html(Message.DELETE_FAILED)
         else:
-            update.message.reply_html(Message.DELETE_DONE)
+            await update.message.reply_html(Message.DELETE_DONE)
     else:
-        update.message.reply_html(Message.NOT_LINKED)
+        await update.message.reply_html(Message.NOT_LINKED)
 
 
 @check_user_status
-def invite_user(update: Update, context: CallbackContext):
+async def invite_user(update: Update, context: CallbackContext):
     """Invite user to group and handle other use cases."""
     database = context.bot_data["database"]
     user_id = update.message.from_user.id
-    chat_mem = context.bot.get_chat_member(Literal.CHAT_GROUP_ID, user_id)
+    chat_mem = await context.bot.get_chat_member(Literal.CHAT_GROUP_ID, user_id)
     in_group = chat_mem.status in (
         ChatMember.ADMINISTRATOR,
-        ChatMember.CREATOR,
+        ChatMember.OWNER,
         ChatMember.MEMBER,
     )
     is_restricted = chat_mem.status == ChatMember.RESTRICTED
-    is_kicked = chat_mem.status == ChatMember.KICKED
+    is_kicked = chat_mem.status == ChatMember.BANNED
 
     if in_group:
-        update.message.reply_html(Message.ALREADY_IN_GROUP)
+        await update.message.reply_html(Message.ALREADY_IN_GROUP)
     elif is_kicked:
-        update.message.reply_html(Message.KICKED_IN_GROUP)
+        await update.message.reply_html(Message.KICKED_IN_GROUP)
     elif is_restricted:
-        update.message.reply_html(Message.MUTED_IN_GROUP)
+        await update.message.reply_html(Message.MUTED_IN_GROUP)
     else:
         count = database.get_invite_links_count(user_id)
         if count < Literal.MAX_INVITE_LINKS:
-            static_command(update, context)
+            await static_command(update, context)
             context.user_data["expectInviteAnswers"] = True
         else:
-            update.message.reply_html(Message.EXHAUSTED_INVITE_LINKS)
+            await update.message.reply_html(Message.EXHAUSTED_INVITE_LINKS)
 
 
 @check_is_group_command
-def reset(update: Update, context: CallbackContext):
+async def reset(update: Update, context: CallbackContext):
     """Reset count of invite links for a user."""
     database = context.bot_data["database"]
 
@@ -144,39 +144,40 @@ def reset(update: Update, context: CallbackContext):
     else:
         user_id, _ = get_user_src_message(update, context)
         if not user_id:
-            update.message.reply_html(Message.INVALID_REPLY)
+            await update.message.reply_html(Message.INVALID_REPLY)
             return
 
     database.reset_invite_links(user_id)
     full_name = database.get_user_full_name(user_id)
     text = Message.RESET_COUNT.format(FULL_NAME=full_name, USER_ID=user_id)
-    src_msg_id = context.bot.send_message(
+    src_msg = await context.bot.send_message(
         chat_id=user_id, text=Message.INVITE_LINKS_RESET
-    ).message_id
-    dst_msg_id = update.effective_message.reply_html(text).message_id
+    )
+    dst_msg = await update.effective_message.reply_html(text)
+    src_msg_id, dst_msg_id = src_msg.message_id, dst_msg.message_id
     database.add_user_message(src_msg_id, user_id, dst_msg_id)
 
 
-def send_help(update: Update, context: CallbackContext):
+async def send_help(update: Update, context: CallbackContext):
     """Send the bot's usage guide intended for private or\
     group depending upon the place of invocation."""
     if update.message.chat.type == update.message.chat.PRIVATE:
-        update.message.reply_photo(
+        await update.message.reply_photo(
             photo=Media.HELP_PRIVATE,
             caption=Message.HELP_PRIVATE.format(GROUP_NAME=Literal.GROUP_NAME),
         )
     else:
-        update.message.reply_html(text=Message.HELP_GROUP)
+        await update.message.reply_html(text=Message.HELP_GROUP)
         context.bot_data["lastUserId"] = Literal.ADMINS_GROUP_ID
 
 
 @check_user_status
-def send_start(update: Update, context: CallbackContext):
+async def send_start(update: Update, context: CallbackContext):
     """Connect the user with admins group in case of private chat,\
     else show the bot's description."""
     context.bot_data.pop("lastUserId", None)
     if update.message.chat.type != update.message.chat.PRIVATE:
-        update.message.reply_html(Message.START_GROUP)
+        await update.message.reply_html(Message.START_GROUP)
         return
 
     buttons = [Button.BLOCK, Button.CONNECT]
@@ -185,7 +186,7 @@ def send_start(update: Update, context: CallbackContext):
     user = update.message.from_user
     user_id = user.id
     full_name = user.full_name
-    membership = get_membership(user_id, context.bot)
+    membership = await get_membership(user_id, context.bot)
     username = f"@{user.username}" if user.username else None
     text = Message.USER_CONNECTED.format(
         FULL_NAME=full_name,
@@ -195,11 +196,11 @@ def send_start(update: Update, context: CallbackContext):
         BLOCKED=False,
     )
 
-    update.message.reply_photo(
+    await update.message.reply_photo(
         photo=Media.START_PRIVATE,
         caption=Message.START_PRIVATE.format(GROUP_NAME=Literal.GROUP_NAME),
     )
-    message = context.bot.send_message(
+    message = await context.bot.send_message(
         chat_id=Literal.ADMINS_GROUP_ID,
         text=text,
         reply_markup=keyboard,
@@ -207,22 +208,22 @@ def send_start(update: Update, context: CallbackContext):
     database.add_user_message(update.message.message_id, user_id, message.message_id)
 
 
-def static_command(update: Update, context: CallbackContext):
+async def static_command(update: Update, context: CallbackContext):
     """Send static command mentioned in static folder."""
     command = update.message.text[1:].split("@")[0]
     try:
         text = open(f"data/static/{command}").read()
     except FileNotFoundError:
-        update.message.reply_html(Message.INVALID_COMMAND)
+        await update.message.reply_html(Message.INVALID_COMMAND)
     else:
-        update.message.reply_html(text)
+        await update.message.reply_html(text)
 
     if update.message.chat.type != update.message.chat.PRIVATE:
         context.bot_data["lastUserId"] = Literal.ADMINS_GROUP_ID
 
 
 @check_is_group_command
-def unblock_user_cl(update: Update, context: CallbackContext):
+async def unblock_user_cl(update: Update, context: CallbackContext):
     """Unblock the user from contacting the admins based on command."""
     database = context.bot_data["database"]
 
@@ -231,14 +232,14 @@ def unblock_user_cl(update: Update, context: CallbackContext):
     else:
         user_id, _ = get_user_src_message(update, context)
         if not user_id:
-            update.message.reply_html(Message.INVALID_REPLY)
+            await update.message.reply_html(Message.INVALID_REPLY)
             return
 
-    msg_id = unblock_user(user_id, context)
+    msg_id = await unblock_user(user_id, context)
 
     full_name = database.get_user_full_name(user_id)
     text = Message.UNBLOCKED_USER.format(USER_ID=user_id, FULL_NAME=full_name)
-    message = update.message.reply_html(text)
+    message = await update.message.reply_html(text)
     database.add_admin_message(update.message.message_id, user_id, msg_id)
     database.add_user_message(1, user_id, message.message_id)
 
@@ -249,7 +250,7 @@ LIST_USERS_LIMIT = 50
 
 
 @check_is_group_command
-def list_users(update: Update, context: CallbackContext):
+async def list_users(update: Update, context: CallbackContext):
     """List blocked/approved/declined users."""
     database = context.bot_data["database"]
     category = context.args[0].lower() if context.args else "all"
@@ -264,33 +265,33 @@ def list_users(update: Update, context: CallbackContext):
         users = database.get_users_by_decision_status("declined", LIST_USERS_LIMIT)
         heading = Message.LIST_DECLINED_USERS
     elif category == "all":
-        _reply_user_list(
+        await _reply_user_list(
             update,
             Message.LIST_BLOCKED_USERS,
             database.get_users_by_blocked(True, LIST_USERS_LIMIT),
         )
-        _reply_user_list(
+        await _reply_user_list(
             update,
             Message.LIST_APPROVED_USERS,
             database.get_users_by_decision_status("approved", LIST_USERS_LIMIT),
         )
-        _reply_user_list(
+        await _reply_user_list(
             update,
             Message.LIST_DECLINED_USERS,
             database.get_users_by_decision_status("declined", LIST_USERS_LIMIT),
         )
         return
     else:
-        update.message.reply_html(Message.LIST_USERS_USAGE)
+        await update.message.reply_html(Message.LIST_USERS_USAGE)
         return
 
-    _reply_user_list(update, heading, users)
+    await _reply_user_list(update, heading, users)
 
 
-def _reply_user_list(update: Update, heading, users):
+async def _reply_user_list(update: Update, heading, users):
     lines = [heading]
     lines.extend(_format_users(users))
-    update.message.reply_html("\n".join(lines))
+    await update.message.reply_html("\n".join(lines))
 
 
 def _format_users(users):
@@ -307,7 +308,7 @@ def _format_users(users):
     ]
 
 @check_is_group_command
-def whois(update: Update, context: CallbackContext):
+async def whois(update: Update, context: CallbackContext):
     """Get information about user replied to or given as argument."""
     database = context.bot_data["database"]
 
@@ -316,11 +317,11 @@ def whois(update: Update, context: CallbackContext):
     else:
         user_id, _ = get_user_src_message(update, context)
         if not user_id:
-            update.message.reply_html(Message.INVALID_REPLY)
+            await update.message.reply_html(Message.INVALID_REPLY)
             return
 
     username, full_name, blocked = database.get_user(user_id)
-    membership = get_membership(user_id, context.bot)
+    membership = await get_membership(user_id, context.bot)
     text = Message.USER.format(
         FULL_NAME=full_name,
         USER_ID=user_id,
@@ -328,4 +329,4 @@ def whois(update: Update, context: CallbackContext):
         MEMBERSHIP=membership,
         BLOCKED=blocked,
     )
-    update.effective_message.reply_html(text)
+    await update.effective_message.reply_html(text)

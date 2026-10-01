@@ -4,8 +4,8 @@ import logging
 import re
 import traceback
 import unicodedata
-from telegram import InlineKeyboardMarkup, Update
-from telegram.error import Unauthorized
+from telegram import Bot, InlineKeyboardMarkup, Update
+from telegram.error import Forbidden
 from telegram.ext import CallbackContext
 from Aashii.constants import Button, Literal, Media, Message
 
@@ -51,7 +51,7 @@ def is_latin_text(text: str) -> bool:
     return all(_is_latin_char(char) for char in text or "")
 
 
-def add_user(update: Update, context: CallbackContext):
+async def add_user(update: Update, context: CallbackContext):
     """Add or update the user to database."""
     if not update.effective_message:
         return
@@ -64,17 +64,17 @@ def add_user(update: Update, context: CallbackContext):
     database.add_user(user_id, username, full_name)
 
 
-def block_user(user_id: int, context: CallbackContext):
+async def block_user(user_id: int, context: CallbackContext):
     """Blocks the user from contacting admins and informs the user."""
     database = context.bot_data["database"]
     database.set_user_blocked(user_id, True)
     try:
-        msg = context.bot.send_photo(
+        msg = await context.bot.send_photo(
             photo=Media.BLOCKED_USER,
             chat_id=user_id,
             caption=Message.BLOCKED_USER_STATUS,
         )
-    except Unauthorized:
+    except Forbidden:
         return 0
     else:
         return msg.message_id
@@ -85,7 +85,7 @@ def dehtml(text: str):
     return _p.sub("", text)
 
 
-def error_handler(_: object, context: CallbackContext):
+async def error_handler(_: object, context: CallbackContext):
     """Handle the known errors and exceptions."""
     error = str(context.error)
     tb = "".join(
@@ -96,7 +96,7 @@ def error_handler(_: object, context: CallbackContext):
     error_text = Message.ERROR.format(ERROR=error, TRACEBACK=tb)
     if Literal.INFORM_ERROR:
         try:
-            context.bot.send_message(
+            await context.bot.send_message(
                 chat_id=Literal.ADMINS_GROUP_ID,
                 text=error_text,
             )
@@ -106,10 +106,10 @@ def error_handler(_: object, context: CallbackContext):
         logging.error("%s\n%s", error, tb)
 
 
-def get_membership(user_id: int, context: CallbackContext):
+async def get_membership(user_id: int, bot: Bot):
     """Return membership of user."""
     try:
-        mem = context.bot.get_chat_member(Literal.CHAT_GROUP_ID, user_id)
+        mem = await bot.get_chat_member(Literal.CHAT_GROUP_ID, user_id)
     except Exception as e:
         print(e)
         membership = Message.FALLBACK_STATUS
@@ -139,7 +139,7 @@ def get_user_src_message(update: Update, context: CallbackContext):
     return (user_id, src_msg_id)
 
 
-def request_join(update: Update, context: CallbackContext):
+async def request_join(update: Update, context: CallbackContext):
     """Send a message in admins group to request addition in chat group."""
     database = context.bot_data["database"]
     user_id = update.chat_join_request.from_user.id
@@ -148,7 +148,7 @@ def request_join(update: Update, context: CallbackContext):
     blocked = database.get_user_blocked(user_id)
 
     if blocked:
-        context.bot.decline_chat_join_request(Literal.CHAT_GROUP_ID, user_id)
+        await context.bot.decline_chat_join_request(Literal.CHAT_GROUP_ID, user_id)
         database.set_user_decision_status(user_id, "declined")
         return
 
@@ -163,7 +163,7 @@ def request_join(update: Update, context: CallbackContext):
     )
     markup = InlineKeyboardMarkup([[Button.APPROVE, Button.DECLINE]])
 
-    dest = context.bot.send_message(
+    dest = await context.bot.send_message(
         chat_id=Literal.ADMINS_GROUP_ID,
         text=text,
         reply_markup=markup,
@@ -173,16 +173,16 @@ def request_join(update: Update, context: CallbackContext):
     database.add_user_message(last_message_id, user_id, dest.message_id)
 
 
-def unblock_user(user_id: int, context: CallbackContext):
+async def unblock_user(user_id: int, context: CallbackContext):
     """Unblock the user from contacting admins and informs the user."""
     database = context.bot_data["database"]
     database.set_user_blocked(user_id, False)
     try:
-        msg = context.bot.send_message(
+        msg = await context.bot.send_message(
             chat_id=user_id,
             text=Message.UNBLOCKED_USER_STATUS,
         )
-    except Unauthorized:
+    except Forbidden:
         return 0
     else:
         return msg.message_id
