@@ -1,0 +1,81 @@
+name: Check and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Compile Python
+        run: python -m compileall -q Aashii
+
+      - name: Validate JSON config
+        run: |
+          for f in data/setup/*.json; do
+            python -m json.tool "$f" > /dev/null && echo "ok: $f"
+          done
+
+  deploy:
+    needs: check
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check deploy secrets
+        env:
+          HOST: ${{ secrets.ORACLE_HOST }}
+          KEY: ${{ secrets.ORACLE_SSH_KEY }}
+        run: |
+          if [ -z "$HOST" ] || [ -z "$KEY" ]; then
+            echo "::error::Set the ORACLE_HOST and ORACLE_SSH_KEY repository secrets to enable auto-deploy."
+            exit 1
+          fi
+
+      - name: Set up SSH
+        env:
+          HOST: ${{ secrets.ORACLE_HOST }}
+          KEY: ${{ secrets.ORACLE_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.ORACLE_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          if [ -n "$KNOWN_HOSTS" ]; then
+            printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/known_hosts
+          else
+            ssh-keyscan -H "$HOST" > ~/.ssh/known_hosts
+          fi
+
+      - name: Pull, install and restart on the server
+        env:
+          HOST: ${{ secrets.ORACLE_HOST }}
+          SSH_USER: ${{ secrets.ORACLE_USER || 'ubuntu' }}
+        run: |
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes "$SSH_USER@$HOST" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          cd ~/Aashii
+          git pull --ff-only origin main
+          .venv/bin/pip install -q -r requirements.txt
+          sudo systemctl restart aashii
+          sleep 10
+          if ! systemctl is-active --quiet aashii; then
+            echo "aashii failed to start:"
+            sudo journalctl -u aashii -n 50 --no-pager
+            exit 1
+          fi
+          echo "Deployed $(git rev-parse --short HEAD); aashii is running."
+          REMOTE
