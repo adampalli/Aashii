@@ -15,6 +15,7 @@ from telegram import (
     InputMediaVideo,
 )
 from telegram.constants import MessageLimit
+from telegram.error import TelegramError
 from Aashii.constants import Message
 from Aashii.utils.misc import dehtml
 
@@ -128,7 +129,7 @@ async def send_edited_message(
             await bot.edit_message_caption(
                 chat_id=chat_id, message_id=dest_message_id, caption=caption
             )
-        except:
+        except TelegramError:
             pass
 
     if message.location:
@@ -136,7 +137,7 @@ async def send_edited_message(
             await bot.edit_message_live_location(
                 chat_id=chat_id, message_id=dest_message_id, location=message.location
             )
-        except:
+        except TelegramError:
             pass
 
     if media:
@@ -144,7 +145,7 @@ async def send_edited_message(
             await bot.edit_message_media(
                 chat_id=chat_id, message_id=dest_message_id, media=media
             )
-        except:
+        except TelegramError:
             pass
 
     if text:
@@ -152,7 +153,7 @@ async def send_edited_message(
             await bot.edit_message_text(
                 chat_id=chat_id, message_id=dest_message_id, text=text
             )
-        except:
+        except TelegramError:
             pass
 
     if send_from:

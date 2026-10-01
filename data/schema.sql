@@ -24,3 +24,8 @@ CREATE TABLE IF NOT EXISTS invite_links (
     links_count INTEGER NOT NULL DEFAULT 1,
     pending BOOL NOT NULL DEFAULT FALSE
 );
+
+CREATE INDEX IF NOT EXISTS from_users_dest_message_id ON from_users (dest_message_id);
+CREATE INDEX IF NOT EXISTS from_users_user_message ON from_users (user_id, message_id);
+CREATE INDEX IF NOT EXISTS from_admins_message_id ON from_admins (message_id);
+CREATE INDEX IF NOT EXISTS from_admins_user_dest_message ON from_admins (user_id, dest_message_id);

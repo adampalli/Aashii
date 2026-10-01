@@ -138,7 +138,8 @@ handlers = {
         ),
         (
             {
-                "filters": filters.Chat(Literal.ADMINS_GROUP_ID),
+                "filters": filters.Chat(Literal.ADMINS_GROUP_ID)
+                & ~filters.UpdateType.EDITED_MESSAGE,
                 "callback": forward_to_user,
             },
         ),

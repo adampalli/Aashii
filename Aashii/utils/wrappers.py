@@ -44,19 +44,6 @@ def check_is_group_command(func):
     return wrapped
 
 
-def check_is_reply_to_user_linked_silent(func):
-    """Check if the message is a reply to a message linked to a user and\
-    not shout on otherwise."""
-
-    @wraps(func)
-    async def wrapped(update: Update, context: CallbackContext):
-        user_id, _ = get_user_src_message(update, context)
-        if user_id:
-            await func(update, context)
-
-    return wrapped
-
-
 def check_is_reply_verbose(func):
     """Check if the message is a reply to any message and warns on otherwise."""
 
