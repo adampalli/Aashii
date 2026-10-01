@@ -152,6 +152,30 @@ pip install -r requirements.txt
 sudo systemctl restart aashii
 ```
 
+## 12) Auto-deploy from GitHub (optional)
+
+The workflow in `.github/workflows/deploy.yml` checks every pull request (Python compiles, JSON config is valid). On every push to `main` it also SSHes into the VM, runs `git pull --ff-only`, installs requirements, restarts `aashii` and fails if the service does not come back up. You can also run it by hand from **Actions -> Check and deploy -> Run workflow**.
+
+One-time setup:
+
+1. On the VM, create a key just for GitHub and authorize it:
+
+   ```bash
+   ssh-keygen -t ed25519 -N "" -C github-deploy -f ~/.ssh/github_deploy
+   cat ~/.ssh/github_deploy.pub >> ~/.ssh/authorized_keys
+   cat ~/.ssh/github_deploy        # private key, copy it for step 2
+   ```
+
+2. In GitHub open **Settings -> Secrets and variables -> Actions -> New repository secret** and add:
+   - `ORACLE_HOST`: the VM's public IP.
+   - `ORACLE_SSH_KEY`: the whole private key printed above, including the `BEGIN` and `END` lines.
+   - `ORACLE_USER` (optional): defaults to `ubuntu`.
+   - `ORACLE_KNOWN_HOSTS` (optional, recommended): output of `ssh-keyscan -H <PUBLIC_IP>` run from your own computer. Without it the workflow trusts whatever host key it sees at deploy time.
+
+3. Then delete the private key from the VM: `rm ~/.ssh/github_deploy`.
+
+Requirements on the VM: port 22 must accept connections from GitHub's runners (the guide's `0.0.0.0/0` rule does), the `ubuntu` user needs passwordless `sudo` (the default on Oracle Ubuntu images), and `~/Aashii` must have no local commits or edits to tracked files, otherwise `git pull --ff-only` stops the deploy.
+
 ## Optional hardening (recommended)
 
 - Restrict SSH source CIDR to your own IP.
