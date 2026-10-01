@@ -4,7 +4,7 @@ from telegram import Update
 from telegram.error import Unauthorized
 from telegram.ext import CallbackContext
 from Aashii.constants import Literal, Message
-from Aashii.utils.misc import get_user_src_message
+from Aashii.utils.misc import get_user_src_message, is_latin_text
 
 
 def check_is_blocked_by_user(func):
@@ -63,6 +63,17 @@ def check_is_reply_verbose(func):
             func(update, context)
         else:
             update.message.reply_html(Message.INVALID_REPLY)
+
+    return wrapped
+
+
+def check_latin_text(func):
+    """Silently drop messages whose text or caption uses a non-Latin script."""
+
+    def wrapped(update: Update, context: CallbackContext):
+        message = update.edited_message or update.message
+        if is_latin_text(message.text or message.caption):
+            func(update, context)
 
     return wrapped
 
