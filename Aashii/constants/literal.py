@@ -18,7 +18,7 @@ class Literal:
 
     FLOOD_WINDOW = int(os.getenv("FLOOD_WINDOW", "60"))
 
-    GROUP_NAME = os.getenv("GROUP_NAME", "Illuminati")
+    GROUP_NAME = os.getenv("GROUP_NAME", "A GRoUP Of eBooKz®")
 
     MAX_INVITE_LINKS = int(os.getenv("MAX_INVITE_LINKS", "1"))
 
