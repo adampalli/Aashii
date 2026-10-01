@@ -12,6 +12,7 @@ commands = {
         BotCommand("delete", COMMAND_DESCRIPTIONS["delete"]),
         BotCommand("listusers", COMMAND_DESCRIPTIONS["listusers"]),
         BotCommand("reset", COMMAND_DESCRIPTIONS["reset"]),
+        BotCommand("stats", COMMAND_DESCRIPTIONS["stats"]),
         BotCommand("unblock", COMMAND_DESCRIPTIONS["unblock"]),
         BotCommand("whois", COMMAND_DESCRIPTIONS["whois"]),
     ],

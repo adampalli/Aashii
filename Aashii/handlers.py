@@ -20,6 +20,7 @@ from Aashii.base.commands import (
     send_help,
     send_start,
     static_command,
+    stats,
     unblock_user_cl,
     whois,
 )
@@ -103,6 +104,13 @@ handlers = {
             {
                 "command": "start",
                 "callback": send_start,
+                "filters": ~filters.Chat(Literal.CHAT_GROUP_ID),
+            },
+        ),
+        (
+            {
+                "command": "stats",
+                "callback": stats,
                 "filters": ~filters.Chat(Literal.CHAT_GROUP_ID),
             },
         ),

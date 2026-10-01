@@ -14,9 +14,15 @@ class Literal:
 
     DELAY_SECONDS = int(os.getenv("DELAY_SECONDS", "3"))
 
+    FLOOD_LIMIT = int(os.getenv("FLOOD_LIMIT", "10"))
+
+    FLOOD_WINDOW = int(os.getenv("FLOOD_WINDOW", "60"))
+
     GROUP_NAME = os.getenv("GROUP_NAME", "Illuminati")
 
     MAX_INVITE_LINKS = int(os.getenv("MAX_INVITE_LINKS", "1"))
+
+    NOTICE_INTERVAL = int(os.getenv("NOTICE_INTERVAL", "600"))
 
     REPLY_CHARACTER = os.getenv("REPLY_CHARACTER", "!")
 

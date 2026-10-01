@@ -1,5 +1,7 @@
 """Wrappers for various handlers."""
 
+import time
+from collections import deque
 from functools import wraps
 from telegram import Update
 from telegram.error import Forbidden
@@ -59,14 +61,55 @@ def check_is_reply_verbose(func):
     return wrapped
 
 
+async def _notice_once(message, context: CallbackContext, key: str, text: str):
+    """Reply with a notice, at most once per NOTICE_INTERVAL for each kind."""
+    now = time.monotonic()
+    last = context.user_data.get(key)
+    if last is None or now - last >= Literal.NOTICE_INTERVAL:
+        context.user_data[key] = now
+        await message.reply_html(text)
+
+
+def check_flood(func):
+    """Drop messages from users who send more than FLOOD_LIMIT per FLOOD_WINDOW."""
+
+    @wraps(func)
+    async def wrapped(update: Update, context: CallbackContext):
+        message = update.edited_message or update.message
+        album = message.media_group_id
+        # An album arrives as one message per photo, so count it only once.
+        if not album or album != context.user_data.get("lastAlbumId"):
+            now = time.monotonic()
+            recent = context.user_data.setdefault("recentMessages", deque())
+            while recent and now - recent[0] >= Literal.FLOOD_WINDOW:
+                recent.popleft()
+
+            if len(recent) >= Literal.FLOOD_LIMIT:
+                await _notice_once(
+                    message, context, "floodNoticeAt", Message.FLOOD_NOTICE
+                )
+                return
+
+            recent.append(now)
+
+        context.user_data["lastAlbumId"] = album
+        await func(update, context)
+
+    return wrapped
+
+
 def check_latin_text(func):
-    """Silently drop messages whose text or caption uses a non-Latin script."""
+    """Drop messages whose text or caption uses a non-Latin script and tell the user."""
 
     @wraps(func)
     async def wrapped(update: Update, context: CallbackContext):
         message = update.edited_message or update.message
         if is_latin_text(message.text or message.caption):
             await func(update, context)
+        else:
+            await _notice_once(
+                message, context, "latinNoticeAt", Message.NON_LATIN_NOTICE
+            )
 
     return wrapped
 
