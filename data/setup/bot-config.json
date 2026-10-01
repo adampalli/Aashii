@@ -1,9 +1,9 @@
 {
   "images": {
-    "BLOCKED_USER": "https://telegra.ph/file/68aa3d09729058f1883f5.jpg",
-    "ADMIN_CONNECTED": "https://telegra.ph/file/70dc7aec0bb44b85f7c62.jpg",
-    "HELP_PRIVATE": "https://telegra.ph/file/bd9a6a1ce0e90d423efea.jpg",
-    "START_PRIVATE": "https://telegra.ph/file/bd9a6a1ce0e90d423efea.jpg"
+    "BLOCKED_USER": "data/images/blocked_user.jpg",
+    "ADMIN_CONNECTED": "data/images/admin_connected.jpg",
+    "HELP_PRIVATE": "data/images/help_private.jpg",
+    "START_PRIVATE": "data/images/start_private.jpg"
   },
   "command_descriptions": {
     "announce": "Announce all users",
