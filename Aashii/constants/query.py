@@ -51,6 +51,17 @@ class Query:
         "WHERE user_id = %(user_id)s AND dest_message_id = %(dest_message_id)s;"
     )
 
+    GET_STATS = (
+        "SELECT "
+        "(SELECT COUNT(*) FROM users), "
+        "(SELECT COUNT(DISTINCT user_id) FROM from_users WHERE message_id > 1), "
+        "(SELECT COUNT(*) FROM users WHERE blocked), "
+        "(SELECT COUNT(*) FROM users WHERE decision_status = 'approved'), "
+        "(SELECT COUNT(*) FROM users WHERE decision_status = 'declined'), "
+        "(SELECT COUNT(DISTINCT (user_id, message_id)) FROM from_users WHERE message_id > 1), "
+        "(SELECT COUNT(DISTINCT message_id) FROM from_admins);"
+    )
+
     GET_USER = (
         "SELECT username, full_name, blocked FROM users WHERE user_id = %(user_id)s;"
     )

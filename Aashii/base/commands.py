@@ -228,6 +228,25 @@ async def static_command(update: Update, context: CallbackContext):
 
 
 @check_is_group_command
+async def stats(update: Update, context: CallbackContext):
+    """Show user and message counts."""
+    database = context.bot_data["database"]
+    users, active, blocked, approved, declined, user_msgs, admin_msgs = (
+        database.get_stats()
+    )
+    text = Message.STATS.format(
+        USERS=users,
+        ACTIVE=active,
+        BLOCKED=blocked,
+        APPROVED=approved,
+        DECLINED=declined,
+        USER_MESSAGES=user_msgs,
+        ADMIN_MESSAGES=admin_msgs,
+    )
+    await update.message.reply_html(text)
+
+
+@check_is_group_command
 async def unblock_user_cl(update: Update, context: CallbackContext):
     """Unblock the user from contacting the admins based on command."""
     database = context.bot_data["database"]

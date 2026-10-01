@@ -28,6 +28,10 @@ class Message:
     ENTITY_FROM = MESSAGES["ENTITY_FROM"]
     EXHAUSTED_INVITE_LINKS = MESSAGES["EXHAUSTED_INVITE_LINKS"]
     FALLBACK_STATUS = MESSAGES["FALLBACK_STATUS"]
+    FLOOD_NOTICE = MESSAGES.get(
+        "FLOOD_NOTICE",
+        "You're sending messages too fast. Please wait a minute and try again.",
+    )
     HELP_GROUP = MESSAGES["HELP_GROUP"]
     HELP_PRIVATE = MESSAGES["HELP_PRIVATE"]
     INFORM_APPROVAL = MESSAGES["INFORM_APPROVAL"]
@@ -46,10 +50,24 @@ class Message:
     LIST_USERS_EMPTY = MESSAGES["LIST_USERS_EMPTY"]
     LIST_USERS_ENTRY = MESSAGES["LIST_USERS_ENTRY"]
     MUTED_IN_GROUP = MESSAGES["MUTED_IN_GROUP"]
+    NON_LATIN_NOTICE = MESSAGES.get(
+        "NON_LATIN_NOTICE",
+        "Your message was not delivered. Please write in English.",
+    )
     NO_ANNOUNCEMENT = MESSAGES["NO_ANNOUNCEMENT"]
     NOT_LINKED = MESSAGES["NOT_LINKED"]
     NOT_PRIVATE_COMMAND = MESSAGES["NOT_PRIVATE_COMMAND"]
     RESET_COUNT = MESSAGES["RESET_COUNT"]
+    STATS = MESSAGES.get(
+        "STATS",
+        "<b>Stats</b>\n • <b>Users</b> : <code>{USERS}</code>\n"
+        " • <b>Users who messaged</b> : <code>{ACTIVE}</code>\n"
+        " • <b>Blocked</b> : <code>{BLOCKED}</code>\n"
+        " • <b>Approved</b> : <code>{APPROVED}</code>\n"
+        " • <b>Declined</b> : <code>{DECLINED}</code>\n"
+        " • <b>Messages from users</b> : <code>{USER_MESSAGES}</code>\n"
+        " • <b>Replies from admins</b> : <code>{ADMIN_MESSAGES}</code>",
+    )
     START_GROUP = MESSAGES["START_GROUP"]
     START_PRIVATE = MESSAGES["START_PRIVATE"]
     UNBLOCKED_USER = MESSAGES["UNBLOCKED_USER"]

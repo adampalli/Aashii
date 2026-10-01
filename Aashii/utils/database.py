@@ -82,6 +82,10 @@ class Database:
         )
         return message_id
 
+    def get_stats(self):
+        """Return user and message counts for the /stats command."""
+        return self._execute(Query.GET_STATS, None, "one")
+
     def get_user(self, user_id: int):
         """Get the details of given user."""
         return self._fetch_one(
