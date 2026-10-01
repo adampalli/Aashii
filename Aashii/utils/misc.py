@@ -1,14 +1,54 @@
 """Miscellaneous functions."""
 
 import logging
-import traceback
 import re
+import traceback
+import unicodedata
 from telegram import InlineKeyboardMarkup, Update
 from telegram.error import Unauthorized
 from telegram.ext import CallbackContext
 from Aashii.constants import Button, Literal, Media, Message
 
 _p = re.compile("<[^>]*>")
+
+# Fancy-font Latin used in usernames and promos, e.g. "𝐇𝐞𝐥𝐥𝐨" or "ℌ".
+_FANCY_LATIN = (range(0x2100, 0x2150), range(0x1D400, 0x1D6A4))
+# Combining accents used by Latin text written in decomposed form, plus the
+# marks emoji are built from (keycaps, variation selectors, flag tags).
+_LATIN_MARKS = (
+    range(0x0300, 0x0370),
+    range(0x1AB0, 0x1B00),
+    range(0x1DC0, 0x1E00),
+    range(0x20D0, 0x2100),
+    range(0xFE00, 0xFE10),
+    range(0xE0000, 0xE0200),
+)
+
+
+def _is_latin_char(char: str) -> bool:
+    """Return False if the character is a letter, mark or digit of a non-Latin script."""
+    category = unicodedata.category(char)
+    code = ord(char)
+
+    if category.startswith("L"):
+        name = unicodedata.name(char, "")
+        if "LATIN" in name or char in "ªº" or any(code in r for r in _FANCY_LATIN):
+            return True
+        return category == "Lm" and name.startswith("MODIFIER LETTER")
+
+    if category.startswith("M"):
+        return any(code in r for r in _LATIN_MARKS)
+
+    if category == "Nd":
+        return code < 0x80 or "MATHEMATICAL" in unicodedata.name(char, "")
+
+    # Punctuation, spaces, symbols and emoji are script-neutral.
+    return True
+
+
+def is_latin_text(text: str) -> bool:
+    """Return True if text uses only the Latin script (English, Italian, French...)."""
+    return all(_is_latin_char(char) for char in text or "")
 
 
 def add_user(update: Update, context: CallbackContext):
@@ -69,7 +109,7 @@ def error_handler(_: object, context: CallbackContext):
 def get_membership(user_id: int, context: CallbackContext):
     """Return membership of user."""
     try:
-        mem = context.get_chat_member(Literal.CHAT_GROUP_ID, user_id)
+        mem = context.bot.get_chat_member(Literal.CHAT_GROUP_ID, user_id)
     except Exception as e:
         print(e)
         membership = Message.FALLBACK_STATUS

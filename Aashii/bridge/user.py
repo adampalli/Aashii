@@ -5,7 +5,7 @@ from telegram import ChatAction, Update
 from telegram.ext import CallbackContext
 from Aashii.constants import Literal, Message
 from Aashii.utils.transfer import send_edited_message, send_message
-from Aashii.utils.wrappers import check_user_status
+from Aashii.utils.wrappers import check_latin_text, check_user_status
 
 
 def _send_admins(context: CallbackContext):
@@ -50,6 +50,7 @@ def _send_invite_link(update: Update, context: CallbackContext):
     database.add_invite_link(user_id, msg_id)
 
 
+@check_latin_text
 @check_user_status
 def edit_user_message(update: Update, context: CallbackContext):
     """Edit the message of user sent to admins."""
@@ -69,6 +70,7 @@ def edit_user_message(update: Update, context: CallbackContext):
         database.add_user_message(message_id, user_id, new_dest_id)
 
 
+@check_latin_text
 @check_user_status
 def forward_to_admins(update: Update, context: CallbackContext):
     """Send the user's message to admins."""
