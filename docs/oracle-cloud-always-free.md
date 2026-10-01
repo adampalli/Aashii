@@ -51,6 +51,8 @@ CREATE DATABASE aashii OWNER aashii;
 
 ## 6) Clone the project and set up Python environment
 
+The bot needs Python 3.10 or newer (`python3 --version`). Ubuntu 22.04 ships 3.10 and 24.04 ships 3.12, so the system Python works.
+
 ```bash
 git clone <YOUR_REPO_URL> ~/Aashii
 cd ~/Aashii

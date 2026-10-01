@@ -2,13 +2,19 @@
 
 from telegram import Bot, Message as TMessage
 from telegram import (
+    MessageOriginChannel,
+    MessageOriginChat,
+    MessageOriginHiddenUser,
+    MessageOriginUser,
+)
+from telegram import (
     InputMediaAnimation,
     InputMediaAudio,
     InputMediaDocument,
     InputMediaPhoto,
     InputMediaVideo,
 )
-from telegram.constants import MAX_CAPTION_LENGTH, MAX_MESSAGE_LENGTH
+from telegram.constants import MessageLimit
 from Aashii.constants import Message
 from Aashii.utils.misc import dehtml
 
@@ -24,24 +30,29 @@ def _get_from_tag(message: TMessage, quote: bool):
     else:
         entity_from = "\n"
 
-    if message.forward_sender_name:
-        name = message.forward_sender_name
+    origin = message.forward_origin
+
+    if isinstance(origin, MessageOriginHiddenUser):
+        name = origin.sender_user_name
         from_tag = Message.ENTITY_FORWARD_ANONYMOUS.format(
             SENDER_NAME=name, FROM=entity_from
         )
-    elif message.forward_from_chat:
-        chat_id = int(str(message.forward_from_chat.id).replace("-100",""))
-        name = message.forward_from_chat.title
-        msg_id = message.forward_from_message_id
+    elif isinstance(origin, (MessageOriginChannel, MessageOriginChat)):
+        if isinstance(origin, MessageOriginChannel):
+            chat, msg_id = origin.chat, origin.message_id
+        else:
+            chat, msg_id = origin.sender_chat, None
+        chat_id = int(str(chat.id).replace("-100",""))
+        name = chat.title
         from_tag = Message.ENTITY_FORWARD_CHAT.format(
             FROM_CHAT_ID = chat_id,
             FROM_CHAT_NAME = name,
             MESSAGE_ID = msg_id,
             FROM = entity_from,
         )
-    elif message.forward_from:
-        user_id = message.forward_from.id
-        name = message.forward_from.full_name
+    elif isinstance(origin, MessageOriginUser):
+        user_id = origin.sender_user.id
+        name = origin.sender_user.full_name
         from_tag = Message.ENTITY_FORWARD_USER.format(
             FROM_USER_ID=user_id, FROM_FULL_NAME=name, FROM=entity_from
         )
@@ -65,17 +76,17 @@ def _get_media(message: TMessage, caption: str):
 
 
 def _get_quotable(message: TMessage, from_tag: str):
-    caption, captionable = _validate_caption(message)
+    caption, caption_len, captionable = _validate_caption(message)
     text, send_from = message.text_html_urled, True
     tag_len = len(dehtml(from_tag))
 
     if not from_tag.strip():
         return text, caption, False
 
-    if message.text and (tag_len + len(message.text) < MAX_MESSAGE_LENGTH):
+    if message.text and (tag_len + len(message.text) < MessageLimit.MAX_TEXT_LENGTH):
         text = f"{from_tag}{text}"
         send_from = False
-    elif captionable and (tag_len + len(message.caption) < MAX_CAPTION_LENGTH):
+    elif captionable and (tag_len + caption_len < MessageLimit.CAPTION_LENGTH):
         caption = f"{from_tag}{caption}"
         send_from = False
 
@@ -91,14 +102,13 @@ def _validate_caption(message: TMessage):
         or message.video
         or message.voice
     ):
-        message.caption = "" if not message.caption else message.caption
         caption = "" if not message.caption else message.caption_html_urled
-        return caption, True
+        return caption, len(message.caption or ""), True
     else:
-        return "", False
+        return "", 0, False
 
 
-def send_edited_message(
+async def send_edited_message(
     bot: Bot, message: TMessage, dest_message_id: int, chat_id: int, quote: bool
 ):
     """Edit the message at destination message ID of given chat."""
@@ -115,7 +125,7 @@ def send_edited_message(
 
     if caption:
         try:
-            bot.edit_message_caption(
+            await bot.edit_message_caption(
                 chat_id=chat_id, message_id=dest_message_id, caption=caption
             )
         except:
@@ -123,7 +133,7 @@ def send_edited_message(
 
     if message.location:
         try:
-            bot.edit_message_live_location(
+            await bot.edit_message_live_location(
                 chat_id=chat_id, message_id=dest_message_id, location=message.location
             )
         except:
@@ -131,7 +141,7 @@ def send_edited_message(
 
     if media:
         try:
-            bot.edit_message_media(
+            await bot.edit_message_media(
                 chat_id=chat_id, message_id=dest_message_id, media=media
             )
         except:
@@ -139,14 +149,14 @@ def send_edited_message(
 
     if text:
         try:
-            bot.edit_message_text(
+            await bot.edit_message_text(
                 chat_id=chat_id, message_id=dest_message_id, text=text
             )
         except:
             pass
 
     if send_from:
-        msg = bot.send_message(
+        msg = await bot.send_message(
             chat_id=chat_id,
             text=from_tag,
             reply_to_message_id=dest_message_id,
@@ -154,7 +164,7 @@ def send_edited_message(
         return msg.message_id
 
 
-def send_message(
+async def send_message(
     bot: Bot,
     message: TMessage,
     to_user: int,
@@ -169,19 +179,19 @@ def send_message(
     msgs = []
 
     if text:
-        msg = bot.send_message(
+        msg = await bot.send_message(
             chat_id=to_user,
             text=text,
             reply_to_message_id=reply_to,
         )
     elif caption:
-        msg = message.copy(
+        msg = await message.copy(
             chat_id=to_user,
             caption=caption,
             reply_to_message_id=reply_to,
         )
     else:
-        msg = message.copy(
+        msg = await message.copy(
             chat_id=to_user,
             reply_to_message_id=reply_to,
         )
@@ -189,7 +199,7 @@ def send_message(
     msgs.append(msg.message_id)
 
     if send_from and not anonymous:
-        omsg = bot.send_message(
+        omsg = await bot.send_message(
             chat_id=to_user,
             text=from_tag,
             reply_to_message_id=msg.message_id,
